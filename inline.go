@@ -60,7 +60,7 @@ func (p *Markdown) inline(currBlock *Node, data []byte) {
 		}
 	}
 	if beg < len(data) {
-		if data[end-1] == '\n' {
+		if iseol(data[end-1]) {
 			end--
 		}
 		currBlock.AppendChild(text(data[beg:end]))
@@ -166,8 +166,7 @@ func maybeLineBreak(p *Markdown, data []byte, offset int) (int, *Node) {
 	for offset < len(data) && data[offset] == ' ' {
 		offset++
 	}
-
-	if offset < len(data) && data[offset] == '\n' {
+	if offset < len(data) && iseol(data[offset]) {
 		if offset-origOffset >= 2 {
 			return offset - origOffset + 1, NewNode(Hardbreak)
 		}
@@ -261,7 +260,7 @@ func link(p *Markdown, data []byte, offset int) (int, *Node) {
 	// look for the matching closing bracket
 	for level := 1; level > 0 && i < len(data); i++ {
 		switch {
-		case data[i] == '\n':
+		case iseol(data[i]):
 			textHasNl = true
 
 		case data[i-1] == '\\':
@@ -408,7 +407,7 @@ func link(p *Markdown, data []byte, offset int) (int, *Node) {
 
 				for j := 1; j < txtE; j++ {
 					switch {
-					case data[j] != '\n':
+					case !iseol(data[j]):
 						b.WriteByte(data[j])
 					case data[j-1] != ' ':
 						b.WriteByte(' ')
@@ -448,7 +447,7 @@ func link(p *Markdown, data []byte, offset int) (int, *Node) {
 
 			for j := 1; j < txtE; j++ {
 				switch {
-				case data[j] != '\n':
+				case !iseol(data[j]):
 					b.WriteByte(data[j])
 				case data[j-1] != ' ':
 					b.WriteByte(' ')
@@ -650,7 +649,7 @@ func escape(p *Markdown, data []byte, offset int) (int, *Node) {
 	data = data[offset:]
 
 	if len(data) > 1 {
-		if p.extensions&BackslashLineBreak != 0 && data[1] == '\n' {
+		if p.extensions&BackslashLineBreak != 0 && iseol(data[1]) {
 			return 2, NewNode(Hardbreak)
 		}
 		if bytes.IndexByte(escapeChars, data[1]) < 0 {
@@ -854,7 +853,7 @@ func autoLink(p *Markdown, data []byte, offset int) (int, *Node) {
 		 *              => foo http://www.pokemon.com/Pikachu_(Electric)
 		 */
 
-		for bufEnd >= 0 && origData[bufEnd] != '\n' && openDelim != 0 {
+		for bufEnd >= 0 && !iseol(origData[bufEnd]) && openDelim != 0 {
 			if origData[bufEnd] == data[linkEnd-1] {
 				openDelim++
 			}
@@ -1066,7 +1065,7 @@ func helperFindEmphChar(data []byte, c byte) int {
 				i++
 			}
 			i++
-			for i < len(data) && (data[i] == ' ' || data[i] == '\n') {
+			for i < len(data) && (data[i] == ' ' || iseol(data[i])) {
 				i++
 			}
 			if i >= len(data) {

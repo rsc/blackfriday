@@ -1140,3 +1140,17 @@ func TestSkipHTML(t *testing.T) {
 		"<p>text inline html more text</p>\n",
 	}, TestParams{HTMLFlags: SkipHTML})
 }
+
+func TestWindowsNewlines(t *testing.T) {
+	var tests = []string{
+		"over *two\r\nlines* test\n",
+		"<p>over <em>two\r\nlines</em> test</p>\n",
+
+		"\r\nfoo\r\n*bar*\r\n",
+		"<p>foo\r\n<em>bar</em></p>\n",
+
+		"# Hello World\r\n\r\nThis is my content.\r\n",
+		"<h1>Hello World</h1>\n\n<p>This is my content.</p>\n",
+	}
+	doTestsInline(t, tests)
+}
